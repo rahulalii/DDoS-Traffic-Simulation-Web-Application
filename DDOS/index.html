@@ -1,0 +1,360 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDoS Attack Simulator — Educational Tool</title>
+    <meta name="description"
+        content="Interactive educational simulation showing how a Distributed Denial of Service (DDoS) attack works, for classroom learning.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+
+    <!-- ===== HEADER ===== -->
+    <header class="header">
+        <div class="header-inner">
+            <div class="header-brand">
+                <div class="brand-icon">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+                        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" stroke="currentColor"
+                            stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </div>
+                <div>
+                    <span class="brand-title">DDoS Simulator</span>
+                    <span class="brand-sub">BY Rahul Ali</span>
+                </div>
+            </div>
+            <div class="header-badges">
+                <span class="badge badge-edu">&#128218; BY Rahul Ali</span>
+                <span class="badge badge-safe">&#128274; Safe &amp; Simulated</span>
+            </div>
+        </div>
+    </header>
+
+    <!-- ===== HERO ===== -->
+    <section class="hero">
+        <div class="hero-content">
+            <div class="hero-tag">This Simulator Make By Rahul Ali</div>
+            <h1 class="hero-title">
+                How Does a <span class="accent-red">DDoS Attack</span> Work?
+            </h1>
+            <p class="hero-desc">
+                A <strong>Distributed Denial of Service (DDoS)</strong> attack floods a target server with massive
+                amounts of fake traffic from thousands of compromised computers &mdash; making the server unable to
+                respond to real users.
+            </p>
+        </div>
+    </section>
+
+    <!-- ===== MAIN ===== -->
+    <main class="main-wrap">
+
+        <!-- STATUS BAR -->
+        <div class="status-bar" id="statusBar">
+            <div class="status-indicator">
+                <span class="status-dot" id="statusDot"></span>
+                <span id="statusText">Server Online &mdash; Normal Traffic</span>
+            </div>
+            <div class="status-stats">
+                <div class="stat-chip">
+                    <span class="stat-label">Total Incoming</span>
+                    <span class="stat-value" id="totalTrafficDisplay">40 req/s</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-label">Server Capacity</span>
+                    <span class="stat-value">120 req/s</span>
+                </div>
+                <div class="stat-chip">
+                    <span class="stat-label">Queue</span>
+                    <span class="stat-value" id="queueDisplay">0 / 80</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- ============================================================
+         DASHBOARD ROW: Canvas (left) + Attack Intensity (right)
+         ============================================================ -->
+        <div class="dashboard-row">
+
+            <!-- LEFT: Simulation Canvas -->
+            <div class="dashboard-left">
+                <div class="sim-container">
+                    <canvas id="simCanvas"></canvas>
+                    <div class="sim-labels">
+                        <div class="node-label label-attackers" id="labelAttackers">
+                            <div class="node-icon node-icon-red">&#129302;</div>
+                            <div class="node-text">
+                                <span class="node-title">Botnet</span>
+                                <span class="node-subtitle" id="botnetCount">0 bots</span>
+                            </div>
+                        </div>
+                        <div class="node-label label-legit">
+                            <div class="node-icon node-icon-green">&#128100;</div>
+                            <div class="node-text">
+                                <span class="node-title">Real Users</span>
+                                <span class="node-subtitle">40 req/s</span>
+                            </div>
+                        </div>
+                        <div class="node-label label-server">
+                            <div class="node-icon" id="serverIcon">&#128421;&#65039;</div>
+                            <div class="node-text">
+                                <span class="node-title">Target Server</span>
+                                <span class="node-subtitle" id="serverStatus">Processing</span>
+                            </div>
+                        </div>
+                        <div class="node-label label-users">
+                            <div class="node-icon" id="usersIcon">&#128522;</div>
+                            <div class="node-text">
+                                <span class="node-title">Web Users</span>
+                                <span class="node-subtitle" id="usersStatus">Getting response</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- RIGHT: Attack Intensity Control Panel -->
+            <div class="dashboard-right">
+                <div class="control-panel">
+                    <div class="control-header">
+                        <div>
+                            <h3 class="control-title">&#9876;&#65039; Attack Intensity</h3>
+                            <p class="control-desc">Drag to simulate DDoS traffic volume</p>
+                        </div>
+                        <div class="control-value-box">
+                            <span id="sliderValueDisplay">0</span>
+                            <small>req/s attack traffic</small>
+                        </div>
+                    </div>
+
+                    <div class="slider-wrap">
+                        <span class="slider-end-label">0</span>
+                        <div class="slider-track-wrap">
+                            <div class="slider-fill" id="sliderFill"></div>
+                            <input type="range" id="attackSlider" min="0" max="300" value="0"
+                                aria-label="Attack traffic slider">
+                        </div>
+                        <span class="slider-end-label">300 req/s</span>
+                    </div>
+
+                    <div class="slider-zones">
+                        <div class="zone zone-normal">Normal</div>
+                        <div class="zone zone-stress">Stressed</div>
+                        <div class="zone zone-overload">Overloaded</div>
+                        <div class="zone zone-crash">Crash</div>
+                    </div>
+
+                    <div class="control-actions">
+                        <button class="preset-btn" onclick="setPreset(0)">&#128994; No Attack</button>
+                        <button class="preset-btn" onclick="setPreset(80)">&#128993; Light Attack</button>
+                        <button class="preset-btn" onclick="setPreset(160)">&#128992; Heavy Attack</button>
+                        <button class="preset-btn preset-danger" onclick="setPreset(300)">&#128308; Max Flood</button>
+                        <button class="reset-btn" onclick="resetSim()">&#8635; Reset</button>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /.dashboard-row -->
+
+        <!-- METRICS PANEL -->
+        <div class="metrics-panel">
+            <div class="metric-card metric-legit">
+                <div class="metric-icon">&#128994;</div>
+                <div class="metric-body">
+                    <span class="metric-label">Legitimate Traffic</span>
+                    <span class="metric-value">40 <small>req/s</small></span>
+                </div>
+            </div>
+            <div class="metric-card metric-attack">
+                <div class="metric-icon">&#128308;</div>
+                <div class="metric-body">
+                    <span class="metric-label">Attack Traffic</span>
+                    <span class="metric-value" id="attackDisplay">0 <small>req/s</small></span>
+                </div>
+            </div>
+            <div class="metric-card metric-served">
+                <div class="metric-icon">&#9989;</div>
+                <div class="metric-body">
+                    <span class="metric-label">Served</span>
+                    <span class="metric-value" id="servedDisplay">40 <small>req/s</small></span>
+                </div>
+            </div>
+            <div class="metric-card metric-denied">
+                <div class="metric-icon">&#10060;</div>
+                <div class="metric-body">
+                    <span class="metric-label">Denied / Dropped</span>
+                    <span class="metric-value" id="deniedDisplay">0 <small>req/s</small></span>
+                </div>
+            </div>
+            <div class="metric-card metric-wait">
+                <div class="metric-icon">&#9201;&#65039;</div>
+                <div class="metric-body">
+                    <span class="metric-label">Avg Wait Time</span>
+                    <span class="metric-value" id="waitDisplay">0.0 <small>s</small></span>
+                </div>
+            </div>
+            <div class="metric-card metric-load">
+                <div class="metric-icon">&#128202;</div>
+                <div class="metric-body">
+                    <span class="metric-label">Server Load</span>
+                    <span class="metric-value" id="loadDisplay">33%</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- QUEUE PANEL -->
+        <div class="queue-panel">
+            <div class="queue-panel-header">
+                <span>&#128229; Request Queue</span>
+                <span id="queueLabel" class="queue-label-text">0 / 80 slots used</span>
+            </div>
+            <div class="queue-grid" id="queueGrid"></div>
+            <div class="queue-legend">
+                <span><span class="legend-dot dot-legit"></span> Legitimate</span>
+                <span><span class="legend-dot dot-attack"></span> Attack (Malicious)</span>
+                <span><span class="legend-dot dot-empty"></span> Empty slot</span>
+            </div>
+        </div>
+
+        <!-- EXPLANATION BOX -->
+        <div class="explanation-box" id="explanationBox">
+            <div class="explanation-phase" id="explanationPhase">&#128994; Phase 1: Normal Operation</div>
+            <p id="explanationText">
+                The server receives <strong>40 legitimate requests per second</strong> from real users. With a capacity
+                of 120 req/s, it handles all requests instantly with zero wait time. Users get fast responses.
+            </p>
+        </div>
+
+        <!-- HOW IT WORKS STEPS -->
+        <div class="steps-section">
+            <h2 class="steps-title">&#127891; How a DDoS Attack Unfolds</h2>
+            <div class="steps-grid">
+                <div class="step-card">
+                    <div class="step-num">01</div>
+                    <div class="step-icon">&#129440;</div>
+                    <h3>Malware Infection</h3>
+                    <p>Attacker infects thousands of computers with malware, turning them into "zombie" machines called
+                        a <strong>botnet</strong>. Owners don't even know their device is infected.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">02</div>
+                    <div class="step-icon">&#128225;</div>
+                    <h3>Command &amp; Control</h3>
+                    <p>The attacker uses a <strong>C&amp;C server</strong> to send a command to all bot machines
+                        simultaneously: "Send requests to target X starting NOW."</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">03</div>
+                    <div class="step-icon">&#127754;</div>
+                    <h3>Traffic Flood</h3>
+                    <p>All bots begin bombarding the target server with millions of fake requests. The server cannot
+                        tell which traffic is real because each packet looks legitimate.</p>
+                </div>
+                <div class="step-card">
+                    <div class="step-num">04</div>
+                    <div class="step-icon">&#128165;</div>
+                    <h3>Server Overload</h3>
+                    <p>The server's queue fills up, legitimate users can't get through, wait times skyrocket, and
+                        eventually the server crashes or becomes completely unresponsive.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- TYPES OF DDOS -->
+        <div class="types-section">
+            <h2 class="steps-title">&#128218; Common DDoS Attack Types</h2>
+            <div class="types-grid">
+                <div class="type-card">
+                    <span class="type-badge badge-vol">Volumetric</span>
+                    <h4>UDP Flood</h4>
+                    <p>Sends massive amounts of UDP packets to overwhelm bandwidth. Typically measured in Gbps.</p>
+                </div>
+                <div class="type-card">
+                    <span class="type-badge badge-vol">Volumetric</span>
+                    <h4>ICMP Flood (Ping Flood)</h4>
+                    <p>Floods the target with ICMP echo requests, saturating both inbound and outbound bandwidth.</p>
+                </div>
+                <div class="type-card">
+                    <span class="type-badge badge-proto">Protocol</span>
+                    <h4>SYN Flood</h4>
+                    <p>Sends thousands of TCP SYN packets, consuming server resources waiting for connections that never
+                        complete.</p>
+                </div>
+                <div class="type-card">
+                    <span class="type-badge badge-proto">Protocol</span>
+                    <h4>Ping of Death</h4>
+                    <p>Sends malformed or oversized packets that crash or freeze the target system when reassembled.</p>
+                </div>
+                <div class="type-card">
+                    <span class="type-badge badge-app">Application</span>
+                    <h4>HTTP Flood</h4>
+                    <p>Sends seemingly legitimate HTTP GET/POST requests to exhaust server resources at the application
+                        layer.</p>
+                </div>
+                <div class="type-card">
+                    <span class="type-badge badge-app">Application</span>
+                    <h4>Slowloris</h4>
+                    <p>Opens many partial HTTP connections and keeps them open, preventing the server from accepting new
+                        connections.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- DEFENSES -->
+        <div class="defense-section">
+            <h2 class="steps-title">&#128737;&#65039; How to Defend Against DDoS</h2>
+            <div class="defense-grid">
+                <div class="defense-item">
+                    <span class="defense-icon">&#127760;</span>
+                    <div>
+                        <strong>CDN &amp; Anycast</strong>
+                        <p>Distribute traffic across many servers worldwide so no single server is overwhelmed.</p>
+                    </div>
+                </div>
+                <div class="defense-item">
+                    <span class="defense-icon">&#129395;</span>
+                    <div>
+                        <strong>Firewall &amp; Rate Limiting</strong>
+                        <p>Block IPs sending too many requests, and filter suspicious traffic patterns automatically.
+                        </p>
+                    </div>
+                </div>
+                <div class="defense-item">
+                    <span class="defense-icon">&#128269;</span>
+                    <div>
+                        <strong>Traffic Scrubbing</strong>
+                        <p>Specialized services analyze all traffic and route only clean, legitimate requests to the
+                            server.</p>
+                    </div>
+                </div>
+                <div class="defense-item">
+                    <span class="defense-icon">&#128200;</span>
+                    <div>
+                        <strong>Auto-Scaling</strong>
+                        <p>Cloud services automatically add more server capacity in response to sudden traffic spikes.
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <!-- ===== FOOTER ===== -->
+    <footer class="footer">
+        <p>&#9888;&#65039; This is a <strong>purely educational simulation</strong>. DDoS attacks are illegal under the
+            Computer Fraud and Abuse Act (CFAA) and similar laws worldwide. This tool is for classroom use only.</p>
+    </footer>
+
+    <script src="script.js"></script>
+</body>
+
+</html>
