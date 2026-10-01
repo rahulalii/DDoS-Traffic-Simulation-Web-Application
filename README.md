@@ -70,8 +70,7 @@ DDoS-Traffic-Simulator/
 Clone the repository:
 
 ```bash
-git clone https://github.com/DDoS-Traffic-Simulation-Web-Application
-/ddos-traffic-simulator.git
+git clone https://github.com/rahulalii/DDoS-Traffic-Simulation-Web-Application.git
 ```
 
 Open the project folder and launch:
